@@ -1,103 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Download, ArrowDownRight, ArrowUpLeft, Loader2, FileText, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
-
-interface Transaccion {
-  id: number
-  usuario_id: number
-  tipo: 'deposito' | 'retiro' | 'apuesta' | 'ganancia' | 'reembolso'
-  monto: number
-  estado: 'pendiente' | 'aprobado' | 'rechazado' | 'completado' | 'cancelado'
-  descripcion: string
-  fecha_creacion: string
-  usuario: {
-    nombre: string
-    apellido1: string
-    correo: string
-    nombre_usuario: string
-  }
-  entidad_financiera?: { nombre: string }
-  metodo_pago?: { nombre: string }
-}
-
-const statusStyles = {
-  completado: 'bg-primary/10 text-primary',
-  aprobado: 'bg-green-500/10 text-green-600',
-  rechazado: 'bg-red-500/10 text-red-600',
-  pendiente: 'bg-yellow-500/10 text-yellow-600',
-  cancelado: 'bg-destructive/10 text-destructive',
-}
-
-const typeColors = {
-  deposito: 'text-primary',
-  retiro: 'text-muted-foreground',
-  apuesta: 'text-blue-400',
-  ganancia: 'text-green-400',
-  reembolso: 'text-orange-400',
-}
+import { Search, Download, ArrowDownRight, ArrowUpLeft, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTransacciones } from '@/hooks/useTransacciones'
+import TransaccionesTable from '@/components/dashboard/transacciones/TransaccionesTable'
 
 export default function TransaccionesPage() {
-  const [transactions, setTransactions] = useState<Transaccion[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState('todos')
-  const [filterStatus, setFilterStatus] = useState('todos')
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(20)
-  const [totalRecords, setTotalRecords] = useState(0)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  
-  const fetchTransactions = async () => {
-    setLoading(true)
-    try {
-      const token = sessionStorage.getItem('admin_token')
-      const offset = (page - 1) * limit
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/transacciones/admin/historial?limit=${limit}&offset=${offset}`
-      if (filterType !== 'todos') url += `&tipo=${filterType}`
-      if (filterStatus !== 'todos') url += `&estado=${filterStatus}`
-      if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`
-
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setTransactions(data.transacciones)
-        setTotalRecords(data.total || 0)
-      }
-    } catch (error) {
-      console.error('Error cargando transacciones', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    await fetchTransactions()
-    setIsRefreshing(false)
-  }
-
-  useEffect(() => {
-    // Debounce de búsqueda
-    const timer = setTimeout(() => {
-      fetchTransactions()
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [searchTerm, filterType, filterStatus, page, limit])
-
-  const totalIngresos = transactions
-    .filter((t) => (t.tipo === 'deposito' || t.tipo === 'ganancia') && (t.estado === 'completado' || t.estado === 'aprobado'))
-    .reduce((sum, t) => sum + t.monto, 0)
-
-  const totalEgresos = transactions
-    .filter((t) => t.tipo === 'retiro' && (t.estado === 'completado' || t.estado === 'aprobado'))
-    .reduce((sum, t) => sum + t.monto, 0)
-
-  const formatId = (id: number) => `TRF-${id.toString().padStart(8, '0')}`
+  const {
+    transactions,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    filterType,
+    setFilterType,
+    filterStatus,
+    setFilterStatus,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    totalRecords,
+    isRefreshing,
+    handleRefresh,
+    totalIngresos,
+    totalEgresos
+  } = useTransacciones()
 
   return (
     <div className="space-y-6">
@@ -187,83 +113,9 @@ export default function TransaccionesPage() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table & Pagination */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-sm font-semibold text-foreground whitespace-nowrap">ID Transacción</th>
-                <th className="px-4 py-3 text-sm font-semibold text-foreground">Fecha</th>
-                <th className="px-4 py-3 text-sm font-semibold text-foreground">Usuario</th>
-                <th className="px-4 py-3 text-sm font-semibold text-foreground">Tipo</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-foreground">Monto</th>
-                <th className="px-4 py-3 text-sm font-semibold text-foreground">Concepto</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">Cargando transacciones...</p>
-                  </td>
-                </tr>
-              ) : transactions.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <p className="text-muted-foreground font-medium">No se encontraron transacciones</p>
-                    <p className="text-sm text-muted-foreground mt-1">Intenta con otros filtros de búsqueda</p>
-                  </td>
-                </tr>
-              ) : (
-                transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 text-sm font-mono font-medium text-foreground">
-                      {formatId(t.id)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                      {new Date(t.fecha_creacion).toLocaleString('es-BO')}
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-foreground">{t.usuario?.nombre_usuario || 'Desconocido'}</p>
-                      <p className="text-xs text-muted-foreground">{t.usuario?.nombre} {t.usuario?.apellido1}</p>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        {t.tipo === 'deposito' || t.tipo === 'ganancia' ? (
-                          <ArrowDownRight className={typeColors[t.tipo] || 'text-muted-foreground'} size={16} />
-                        ) : (
-                          <ArrowUpLeft className={typeColors[t.tipo] || 'text-muted-foreground'} size={16} />
-                        )}
-                        <span className={`capitalize ${typeColors[t.tipo] || 'text-muted-foreground'} font-medium`}>
-                          {t.tipo === 'deposito' ? 'Recarga' : t.tipo === 'ganancia' ? 'Abono Ganancia' : t.tipo}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right text-foreground font-bold">
-                      Bs {t.monto.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {t.descripcion}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                          statusStyles[t.estado] || statusStyles.pendiente
-                        }`}
-                      >
-                        {t.estado}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <TransaccionesTable transactions={transactions} loading={loading} />
         
         {/* Pagination Controls */}
         <div className="bg-muted/30 border-t border-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">

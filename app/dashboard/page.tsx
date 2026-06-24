@@ -1,34 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import StatsCard from '@/components/dashboard/StatsCard'
 import RecentUsers from '@/components/dashboard/RecentUsers'
 import RecentTransactions from '@/components/dashboard/RecentTransactions'
 import RevenueChart from '@/components/dashboard/RevenueChart'
 import DistributionChart from '@/components/dashboard/DistributionChart'
-import { Users, DollarSign, Gamepad2, TrendingUp, RefreshCw, BarChart2, PieChart as PieChartIcon, Calendar, Download, AlertCircle, Dice5, Goal, Banknote, Clock } from 'lucide-react'
-import { getDashboardStats } from '@/lib/api'
+import { Users, DollarSign, TrendingUp, RefreshCw, BarChart2, PieChart as PieChartIcon, Calendar, Download, AlertCircle, Dice5, Goal, Banknote, Clock } from 'lucide-react'
+
+// Hooks y Utils Extraídos (SRP)
+import { useDashboard } from '@/hooks/useDashboard'
+import { exportDashboardPDF } from '@/lib/pdf-exporter'
 
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState('7d')
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const res = await getDashboardStats(range)
-      setData(res)
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
-  }, [range])
+  const { data, loading, range, setRange, fetchData } = useDashboard();
 
   if (loading || !data) {
     return (
@@ -70,7 +54,7 @@ export default function DashboardPage() {
           </div>
 
           <button 
-            onClick={() => alert('Generando reporte PDF...')}
+            onClick={() => exportDashboardPDF(data, range)}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all duration-300 font-bold text-sm shadow-lg shadow-emerald-500/20"
           >
             <Download size={16} />

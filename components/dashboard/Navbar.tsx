@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Menu, Bell, Settings, User, LogOut } from 'lucide-react'
+import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 
 interface NavbarProps {
@@ -57,14 +58,18 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
             <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50">
               <div className="p-3 border-b border-border">
                 <p className="text-sm font-medium text-foreground">{user?.nombre || 'Admin'}</p>
-                <p className="text-xs text-muted-foreground">{user?.email || 'admin@trifobet.com'}</p>
+                <p className="text-xs text-muted-foreground">{user?.correo || 'admin@trifobet.com'}</p>
               </div>
 
               <div className="p-2 space-y-1">
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors">
+                <Link
+                  href="/dashboard/perfil"
+                  onClick={() => setShowUserMenu(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors"
+                >
                   <User size={16} />
                   Mi Perfil
-                </button>
+                </Link>
                 <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors">
                   <Settings size={16} />
                   Configuración

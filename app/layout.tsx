@@ -14,21 +14,7 @@ export const metadata: Metadata = {
   description: 'Sistema administrativo de casino en línea TrifoBet',
   generator: 'DeeperCode',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32b.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32g.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/iconb.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/icon.png',
   },
 }
 

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginAdmin } from '@/lib/api'
+import { ROLES_CON_ACCESO_ADMIN } from '@/lib/constants'
 
 export interface AuthUser {
   id: number
@@ -54,9 +55,8 @@ export function useAuth(): UseAuthReturn {
     try {
       const result = await loginAdmin(email, password)
 
-      // Verificar que sea personal administrativo (roles permitidos: 1, 3, 5, 6)
-      const rolesAdministrativos = [1, 3, 5, 6];
-      if (!rolesAdministrativos.includes(result.usuario.rol_id)) {
+      // Solo los roles administrativos pueden acceder al panel (KISS: la validación se explica sola)
+      if (!ROLES_CON_ACCESO_ADMIN.includes(result.usuario.rol_id)) {
         throw new Error('Acceso denegado: cuenta no autorizada para el panel administrativo')
       }
 

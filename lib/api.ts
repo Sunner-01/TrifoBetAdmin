@@ -29,7 +29,7 @@ async function request<T>(
   return res.json()
 }
 
-// ─── Auth ───────────────────────────────────────────────────
+//  Auth
 export async function loginAdmin(correo: string, contrasena: string) {
   return request<{
     access_token: string
@@ -46,7 +46,7 @@ export async function loginAdmin(correo: string, contrasena: string) {
   })
 }
 
-// ─── Admin: Estadísticas ─────────────────────────────────────
+//  Admin: Estadísticas 
 export async function getAdminStats() {
   return request<{
     totalUsuarios: number
@@ -61,7 +61,7 @@ export async function getDashboardStats(range: string = '7d') {
   return request<any>(`/admin/dashboard-stats?range=${range}`)
 }
 
-// ─── Admin: Usuarios ─────────────────────────────────────────
+//  Admin: Usuarios 
 export interface UsuarioAdmin {
   id: number
   nombre: string
@@ -125,7 +125,7 @@ export async function updateUsuario(id: number, data: Partial<UsuarioAdmin>) {
   })
 }
 
-// ─── Admin: Verificaciones KYC ───────────────────────────────
+//  Admin: Verificaciones KYC
 export interface VerificacionAdmin {
   id: number
   usuario_id: number
@@ -174,7 +174,7 @@ export async function procesarVerificacion(id: number, accion: 'aprobar' | 'rech
   })
 }
 
-// ─── Admin: Apuestas ─────────────────────────────────────────
+//  Admin: Apuestas 
 
 export async function getTodasApuestas(params?: {
   page?: number
@@ -195,7 +195,7 @@ export async function getEstadisticasApuestas() {
   return request<any>('/admin/apuestas/stats')
 }
 
-// ─── Admin: Personal ─────────────────────────────────────────
+//  Admin: Personal 
 
 export async function getPersonal(params: { page?: number; limit?: number; search?: string }) {
   const q = new URLSearchParams()
@@ -231,7 +231,7 @@ export async function getPersonalStats(id: number) {
   return request<any>(`/admin/personal/${id}/stats`)
 }
 
-// ─── Admin: Juegos Casino ────────────────────────────────────
+//  Admin: Juegos Casino
 export interface JuegoCasino {
   id: number;
   nombre: string;
@@ -255,29 +255,29 @@ export interface JuegoCasino {
 }
 
 export async function getJuegosAdmin() {
-  return request<JuegoCasino[]>('/juegos-casino/admin')
+  return request<JuegoCasino[]>('/admin/juegos-casino')
 }
 
 export async function getJuegosAdminStats() {
-  return request<JuegoCasino[]>('/juegos-casino/admin/stats')
+  return request<JuegoCasino[]>('/admin/juegos-casino/stats')
 }
 
 export async function createJuego(dto: any) {
-  return request<JuegoCasino>('/juegos-casino', {
+  return request<JuegoCasino>('/admin/juegos-casino', {
     method: 'POST',
     body: JSON.stringify(dto),
   })
 }
 
 export async function updateJuego(id: number, dto: any) {
-  return request<JuegoCasino>(`/juegos-casino/${id}`, {
+  return request<JuegoCasino>(`/admin/juegos-casino/${id}`, {
     method: 'PUT',
     body: JSON.stringify(dto),
   })
 }
 
 export async function deleteJuego(id: number) {
-  return request<{ message: string }>(`/juegos-casino/${id}`, {
+  return request<{ message: string }>(`/admin/juegos-casino/${id}`, {
     method: 'DELETE',
   })
 }

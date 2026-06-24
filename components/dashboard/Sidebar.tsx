@@ -50,9 +50,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     >
       {/* Logo */}
       <div className="p-4 flex items-center justify-center border-b border-sidebar-border">
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
-          TB
-        </div>
+        <img src="/icon.png" alt="TrifoBet Logo" className="w-10 h-10 rounded-lg" />
         {isOpen && <span className="ml-3 font-bold text-lg">TrifoBet</span>}
       </div>
 

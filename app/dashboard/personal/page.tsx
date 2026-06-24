@@ -1,107 +1,47 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import {
-  Search, UserPlus, ShieldAlert, CheckCircle, XCircle, RefreshCw, KeyRound, Eye, ChevronLeft, ChevronRight, BarChart3, Edit2
-} from 'lucide-react'
-import {
-  getPersonal, createPersonal, toggleHabilitarPersonal, resetPasswordPersonal, getPersonalStats
-} from '@/lib/api'
+import { Search, UserPlus, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { usePersonalAdmin } from '@/hooks/usePersonalAdmin'
+
+// Dumb Components
+import { AccesoDenegado } from '@/components/dashboard/personal/AccesoDenegado'
+import { PersonalTable } from '@/components/dashboard/personal/PersonalTable'
+
+// Modals
 import PersonalModal from './PersonalModal'
 import PersonalStatsModal from './PersonalStatsModal'
 import PersonalViewModal from './PersonalViewModal'
 
-const ROL_LABELS: Record<number, string> = {
-  1: 'Administrador',
-  3: 'Soporte',
-  5: 'Verificador',
-  6: 'Cajero / Finanzas',
-}
-
-const ROL_COLORS: Record<number, string> = {
-  1: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
-  3: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-  5: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-  6: 'bg-green-500/10 text-green-400 border border-green-500/20',
-}
-
 export default function PersonalPage() {
   const { user } = useAuth()
-  const [data, setData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(20)
-
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [selectedWorker, setSelectedWorker] = useState<any>(null)
-  const [selectedStatsId, setSelectedStatsId] = useState<number | null>(null)
-  const [selectedViewWorker, setSelectedViewWorker] = useState<any>(null)
-  const [actionLoading, setActionLoading] = useState<number | null>(null)
-
-  const fetchPersonal = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const result = await getPersonal({ page, limit, search: searchTerm || undefined })
-      setData(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar personal')
-    } finally {
-      setLoading(false)
-    }
-  }, [page, limit, searchTerm])
-
-  useEffect(() => {
-    fetchPersonal()
-  }, [fetchPersonal])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchTerm(searchInput)
-      setPage(1)
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [searchInput])
-
-  const handleToggleEstado = async (id: number) => {
-    if (!window.confirm('¿Seguro que deseas cambiar el estado de acceso de este trabajador?')) return
-    setActionLoading(id)
-    try {
-      await toggleHabilitarPersonal(id)
-      await fetchPersonal()
-    } catch (err: any) {
-      alert(err.message)
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const handleResetPassword = async (id: number) => {
-    if (!window.confirm('¿Restablecer la contraseña a la por defecto (Pass123.)?')) return
-    setActionLoading(id)
-    try {
-      const res = await resetPasswordPersonal(id)
-      alert(res.message)
-    } catch (err: any) {
-      alert(err.message)
-    } finally {
-      setActionLoading(null)
-    }
-  }
+  const {
+    data,
+    loading,
+    error,
+    searchInput,
+    setSearchInput,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    selectedWorker,
+    setSelectedWorker,
+    selectedStatsId,
+    setSelectedStatsId,
+    selectedViewWorker,
+    setSelectedViewWorker,
+    actionLoading,
+    fetchPersonal,
+    handleToggleEstado,
+    handleResetPassword
+  } = usePersonalAdmin()
 
   if (user?.rol_id !== 1) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-        <ShieldAlert size={64} className="text-red-500/50" />
-        <h2 className="text-2xl font-bold">Acceso Denegado</h2>
-        <p className="text-muted-foreground">No tienes permisos para ver o gestionar al personal administrativo.</p>
-      </div>
-    )
+    return <AccesoDenegado />
   }
 
   const personal = data?.data || []
@@ -159,142 +99,22 @@ export default function PersonalPage() {
         </div>
       </div>
 
-      <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-              <tr>
-                <th className="px-6 py-4 font-medium">Trabajador</th>
-                <th className="px-6 py-4 font-medium">Rol</th>
-                <th className="px-6 py-4 font-medium">Estado</th>
-                <th className="px-6 py-4 font-medium text-center">Transacciones (Total)</th>
-                <th className="px-6 py-4 font-medium text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading && !personal.length ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
-                    Cargando personal...
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-red-400">
-                    {error}
-                  </td>
-                </tr>
-              ) : personal.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
-                    No se encontraron trabajadores
-                  </td>
-                </tr>
-              ) : (
-                personal.map((p: any) => (
-                  <tr key={p.id} className="hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">{p.nombre}</span>
-                        <span className="text-xs text-muted-foreground">{p.correo}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${ROL_COLORS[p.rol_id] || 'bg-gray-500/10 text-gray-400'}`}>
-                        {ROL_LABELS[p.rol_id] || p.rol?.nombre || 'Desconocido'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        p.habilitado 
-                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
-                          : 'bg-red-500/10 text-red-400 border-red-500/20'
-                      }`}>
-                        {p.habilitado ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                        {p.habilitado ? 'Activo' : 'Suspendido'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center font-mono font-medium">
-                      {p.transacciones_procesadas || 0}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedViewWorker(p)}
-                          className="p-2 hover:bg-emerald-500/10 hover:text-emerald-400 text-muted-foreground rounded-xl transition-all duration-300 hover:scale-110"
-                          title="Ver Perfil Detallado"
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedWorker(p)
-                            setIsCreateModalOpen(true)
-                          }}
-                          className="p-2 hover:bg-blue-500/10 hover:text-blue-400 text-muted-foreground rounded-xl transition-all duration-300 hover:scale-110"
-                          title="Editar Perfil"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => setSelectedStatsId(p.id)}
-                          className="p-2 hover:bg-emerald-500/10 hover:text-emerald-400 text-muted-foreground rounded-xl transition-all duration-300 hover:scale-110"
-                          title="Ver Rendimiento Detallado"
-                        >
-                          <BarChart3 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleResetPassword(p.id)}
-                          disabled={actionLoading === p.id || p.id === user?.id}
-                          className="p-2 hover:bg-yellow-500/10 hover:text-yellow-400 text-muted-foreground rounded-xl transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-                          title="Restablecer Contraseña"
-                        >
-                          <KeyRound size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleToggleEstado(p.id)}
-                          disabled={actionLoading === p.id || p.id === user?.id}
-                          className="p-2 hover:bg-red-500/10 hover:text-red-400 text-muted-foreground rounded-xl transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-                          title={p.habilitado ? 'Suspender Acceso' : 'Habilitar Acceso'}
-                        >
-                          {p.habilitado ? <XCircle size={18} /> : <CheckCircle size={18} />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
-            <span className="text-sm text-muted-foreground">
-              Mostrando {personal.length} de {data.total}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-2 rounded-lg border border-border hover:bg-muted disabled:opacity-50 transition-colors"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="flex items-center px-4 text-sm font-medium border border-border rounded-lg bg-background">
-                {page} / {data.totalPages}
-              </span>
-              <button
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                disabled={page === data.totalPages}
-                className="p-2 rounded-lg border border-border hover:bg-muted disabled:opacity-50 transition-colors"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <PersonalTable 
+        loading={loading}
+        error={error}
+        personal={personal}
+        data={data}
+        page={page}
+        setPage={setPage}
+        user={user}
+        actionLoading={actionLoading}
+        setSelectedViewWorker={setSelectedViewWorker}
+        setSelectedWorker={setSelectedWorker}
+        setIsCreateModalOpen={setIsCreateModalOpen}
+        setSelectedStatsId={setSelectedStatsId}
+        handleResetPassword={handleResetPassword}
+        handleToggleEstado={handleToggleEstado}
+      />
 
       {isCreateModalOpen && (
         <PersonalModal
