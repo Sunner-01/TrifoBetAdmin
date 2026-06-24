@@ -45,7 +45,7 @@ export default function SoportePage() {
   useEffect(() => {
     fetchTickets()
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("admin_token")
     if (token) {
       const baseUrl = API_URL
       const newSocket = io(`${baseUrl}/soporte`, {
@@ -72,7 +72,7 @@ export default function SoportePage() {
 
   const fetchTickets = async () => {
     try {
-      const token = localStorage.getItem("token")
+      const token = sessionStorage.getItem("admin_token")
       if (!token) return
       
       const baseUrl = API_URL
@@ -96,7 +96,7 @@ export default function SoportePage() {
     setActiveTicket(ticket)
     
     try {
-      const token = localStorage.getItem("token")
+      const token = sessionStorage.getItem("admin_token")
       const baseUrl = API_URL
       const res = await fetch(`${baseUrl}/soporte/ticket/${ticket.id}/mensajes`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -127,7 +127,7 @@ export default function SoportePage() {
       formData.append("file", selectedFile)
       
       try {
-        const token = localStorage.getItem("token")
+        const token = sessionStorage.getItem("admin_token")
         const baseUrl = API_URL
         const res = await fetch(`${baseUrl}/soporte/upload`, {
           method: "POST",
@@ -159,7 +159,7 @@ export default function SoportePage() {
   const closeTicket = async () => {
     if (!activeTicket) return
     try {
-      const token = localStorage.getItem("token")
+      const token = sessionStorage.getItem("admin_token")
       const baseUrl = API_URL
       const res = await fetch(`${baseUrl}/soporte/admin/ticket/${activeTicket.id}`, {
         method: "PUT",
