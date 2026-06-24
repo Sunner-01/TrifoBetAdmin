@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { API_URL } from './api';
 
 function getToken() {
   if (typeof window === 'undefined') return null;

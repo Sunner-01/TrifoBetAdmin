@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API_URL } from '@/lib/api';
 
 export function useReportesAdmin() {
   const [activeTab, setActiveTab] = useState('financieros');
@@ -22,7 +23,7 @@ export function useReportesAdmin() {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
-      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/reportes`;
+      const baseUrl = API_URL + '/reportes';
 
       let params = '';
       if (startDate && endDate) {

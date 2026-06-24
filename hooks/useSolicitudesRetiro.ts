@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API_URL } from '@/lib/api';
 
 export interface TransaccionRetiro {
   id: number;
@@ -35,7 +36,7 @@ export function useSolicitudesRetiro() {
     try {
       const token = sessionStorage.getItem('admin_token');
       const offset = (page - 1) * limit;
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retiros/admin/solicitudes?limit=${limit}&offset=${offset}`, {
+      const res = await fetch(`${API_URL}/retiros/admin/solicitudes?limit=${limit}&offset=${offset}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -70,7 +71,7 @@ export function useSolicitudesRetiro() {
 
     try {
       const token = sessionStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retiros/admin/procesar/${activeRetiro.id}`, {
+      const res = await fetch(`${API_URL}/retiros/admin/procesar/${activeRetiro.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -101,7 +102,7 @@ export function useSolicitudesRetiro() {
     setSubmitting(true);
     try {
       const token = sessionStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retiros/admin/rechazar/${rejectingRetiro}`, {
+      const res = await fetch(`${API_URL}/retiros/admin/rechazar/${rejectingRetiro}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });

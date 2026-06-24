@@ -1,7 +1,7 @@
 // lib/api.ts
 // Cliente centralizado para comunicación con el backend NestJS
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null

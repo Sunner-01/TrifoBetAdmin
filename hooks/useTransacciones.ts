@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 
 export interface Transaccion {
   id: number;
@@ -50,7 +51,7 @@ export function useTransacciones() {
     try {
       const token = sessionStorage.getItem('admin_token');
       const offset = (page - 1) * limit;
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/transacciones/admin/historial?limit=${limit}&offset=${offset}`;
+      let url = `${API_URL}/transacciones/admin/historial?limit=${limit}&offset=${offset}`;
       if (filterType !== 'todos') url += `&tipo=${filterType}`;
       if (filterStatus !== 'todos') url += `&estado=${filterStatus}`;
       if (searchTerm) url += `&searchTerm=${encodeURIComponent(searchTerm)}`;

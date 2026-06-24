@@ -1,5 +1,6 @@
 'use client'
 
+import { API_URL } from '@/lib/api'
 import { useState, useEffect, useRef } from 'react'
 import { Send, Image as ImageIcon, User, CheckCircle, Tag } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
@@ -46,7 +47,7 @@ export default function SoportePage() {
 
     const token = localStorage.getItem("token")
     if (token) {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      const baseUrl = API_URL
       const newSocket = io(`${baseUrl}/soporte`, {
         auth: { token: `Bearer ${token}` }
       })
@@ -74,7 +75,7 @@ export default function SoportePage() {
       const token = localStorage.getItem("token")
       if (!token) return
       
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      const baseUrl = API_URL
       const res = await fetch(`${baseUrl}/soporte/admin/tickets`, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -96,7 +97,7 @@ export default function SoportePage() {
     
     try {
       const token = localStorage.getItem("token")
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      const baseUrl = API_URL
       const res = await fetch(`${baseUrl}/soporte/ticket/${ticket.id}/mensajes`, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -127,7 +128,7 @@ export default function SoportePage() {
       
       try {
         const token = localStorage.getItem("token")
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        const baseUrl = API_URL
         const res = await fetch(`${baseUrl}/soporte/upload`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -159,7 +160,7 @@ export default function SoportePage() {
     if (!activeTicket) return
     try {
       const token = localStorage.getItem("token")
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      const baseUrl = API_URL
       const res = await fetch(`${baseUrl}/soporte/admin/ticket/${activeTicket.id}`, {
         method: "PUT",
         headers: { 

@@ -1,5 +1,6 @@
 'use client'
 
+import { API_URL } from '@/lib/api'
 import { useState, useEffect } from 'react'
 import { Check, X, Loader2, Image as ImageIcon, Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
@@ -42,7 +43,7 @@ export function CuentasPendientes() {
     try {
       const token = sessionStorage.getItem('admin_token')
       const offset = (page - 1) * limit
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/retiros/admin/cuentas?estado=${filterEstado}&billetera=${filterBilletera}&limit=${limit}&offset=${offset}`
+      let url = `${API_URL}/retiros/admin/cuentas?estado=${filterEstado}&billetera=${filterBilletera}&limit=${limit}&offset=${offset}`
 
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
@@ -73,7 +74,7 @@ export function CuentasPendientes() {
     setProcessingId(id)
     try {
       const token = sessionStorage.getItem('admin_token')
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/retiros/admin/cuentas/${id}`, {
+      const res = await fetch(`${API_URL}/retiros/admin/cuentas/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
