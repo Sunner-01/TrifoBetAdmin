@@ -22,6 +22,11 @@ async function request<T>(
   const res = await fetch(`${API_URL}${path}`, { ...options, headers })
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      sessionStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_user')
+      window.location.href = '/'
+    }
     const err = await res.json().catch(() => ({ message: 'Error desconocido' }))
     throw new Error(err.message || `Error ${res.status}`)
   }

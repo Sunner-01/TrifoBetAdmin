@@ -13,6 +13,16 @@ export default function LoginPage() {
     e.preventDefault()
     setLocalError('')
 
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setLocalError('Por favor ingrese un correo válido')
+      return
+    }
+
+    if (!password || password.length < 6) {
+      setLocalError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
     try {
       await login(email, password)
     } catch (err) {
@@ -82,14 +92,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground">
-              Usuario demo: admin@trifobet.com
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Contraseña: 123456
-            </p>
-          </div>
         </div>
       </div>
     </div>
