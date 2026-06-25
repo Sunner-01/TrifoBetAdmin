@@ -31,17 +31,6 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
 
       {/* Right Section - User Menu and Notifications */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <button className="p-2 hover:bg-muted rounded-lg transition-colors relative">
-          <Bell size={20} className="text-foreground" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
-        </button>
-
-        {/* Settings */}
-        <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-          <Settings size={20} className="text-foreground" />
-        </button>
-
         {/* User Menu */}
         <div className="relative">
           <button
@@ -70,10 +59,6 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
                   <User size={16} />
                   Mi Perfil
                 </Link>
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors">
-                  <Settings size={16} />
-                  Configuración
-                </button>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
